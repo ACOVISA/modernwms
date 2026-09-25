@@ -14,7 +14,7 @@ ARG VITE_BASE_PATH=http://127.0.0.1
 ARG VITE_SERVER_PORT=20011
 ENV VITE_BASE_PATH=$VITE_BASE_PATH
 ENV VITE_SERVER_PORT=$VITE_SERVER_PORT
-RUN npx vite build
+RUN node node_modules/vite/bin/vite.js build
 
 # ---- Final image ----
 FROM ubuntu:22.04

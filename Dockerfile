@@ -7,7 +7,6 @@ RUN dotnet publish ModernWMS/ModernWMS.csproj -c Release -o /out
 # ---- Frontend build ----
 FROM node:16-alpine AS frontend-build
 WORKDIR /src
-RUN npm install -g yarn
 COPY frontend/package.json frontend/yarn.lock* ./
 RUN yarn install --frozen-lockfile || yarn install
 COPY frontend/ .

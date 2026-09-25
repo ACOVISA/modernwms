@@ -35,6 +35,9 @@ function getStorageLang() {
       return 'zh_CN'
     case 'zh-TW':
       return 'zh_TW'
+    case 'pt-BR':
+    case 'pt':
+      return 'pt_BR'
     case 'en':
     default:
       return 'en_US'

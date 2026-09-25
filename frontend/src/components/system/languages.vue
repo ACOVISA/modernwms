@@ -31,7 +31,8 @@ const data = reactive({
   languageList: [
     { title: '简体中文', value: 'zh' },
     { title: '繁體中文', value: 'tw' },
-    { title: 'English', value: 'en' }
+    { title: 'English', value: 'en' },
+    { title: 'Português (Brasil)', value: 'pt' }
   ]
 })
 

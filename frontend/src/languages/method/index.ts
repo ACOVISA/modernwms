@@ -2,12 +2,14 @@
 import zhCN from 'vxe-table/lib/locale/lang/zh-CN'
 import enUS from 'vxe-table/lib/locale/lang/en-US'
 import zhTW from 'vxe-table/lib/locale/lang/zh-TW'
+import ptBR from 'vxe-table/lib/locale/lang/pt-BR'
 import { store } from '@/store'
 import i18n from '../i18n'
 
 import en from '../langsJson/en.json'
 import cn from '../langsJson/cn.json'
 import tw from '../langsJson/tw.json'
+import ptbr from '../langsJson/pt_BR.json'
 
 export function getSelectedLang(lang: string) {
   switch (lang) {
@@ -17,6 +19,8 @@ export function getSelectedLang(lang: string) {
       return 'en_US'
     case 'tw':
       return 'zh_TW'
+    case 'pt':
+      return 'pt_BR'
     default:
       return 'en_US'
   }
@@ -24,13 +28,16 @@ export function getSelectedLang(lang: string) {
 
 // Obtain default language pack based on language
 export function getLangPackage(lang: string) {
-  const result = { zh_CN: {}, zh_TW: {}, en_US: {} }
+  const result = { zh_CN: {}, zh_TW: {}, en_US: {}, pt_BR: {} }
   switch (lang) {
     case 'zh_CN':
       result.zh_CN = { ...cn, ...zhCN }
       break
     case 'zh_TW':
       result.zh_TW = { ...tw, ...zhTW }
+      break
+    case 'pt_BR':
+      result.pt_BR = { ...ptbr, ...ptBR }
       break
     case 'en_US':
     default:

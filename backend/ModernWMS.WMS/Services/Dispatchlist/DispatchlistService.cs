@@ -43,6 +43,11 @@ namespace ModernWMS.WMS.Services
         /// </summary>
         private readonly FunctionHelper _functionHelper;
 
+        /// <summary>
+        /// Fleetbase integration
+        /// </summary>
+        private readonly IFleetbaseIntegrationService _fleetbaseIntegrationService;
+
         #endregion Args
 
         #region constructor
@@ -56,11 +61,13 @@ namespace ModernWMS.WMS.Services
             SqlDBContext dBContext
           , IStringLocalizer<ModernWMS.Core.MultiLanguage> stringLocalizer
            , FunctionHelper functionHelper
+           , IFleetbaseIntegrationService fleetbaseIntegrationService
             )
         {
             this._dBContext = dBContext;
             this._stringLocalizer = stringLocalizer;
             this._functionHelper = functionHelper;
+            this._fleetbaseIntegrationService = fleetbaseIntegrationService;
         }
 
         #endregion constructor
@@ -1460,11 +1467,35 @@ namespace ModernWMS.WMS.Services
             }
             if (res > 0)
             {
+                await NotifyFleetbaseAsync(entities);
                 return (true, _stringLocalizer["operation_success"]);
             }
             else
             {
                 return (false, _stringLocalizer["operation_failed"]);
+            }
+        }
+
+        /// <summary>
+        /// Notifies Fleetbase of dispatches that just left the warehouse, so it can pick up delivery/routing.
+        /// A Fleetbase outage never fails the dispatch itself: the integration service swallows its own errors.
+        /// </summary>
+        private async Task NotifyFleetbaseAsync(List<DispatchlistEntity> entities)
+        {
+            var customer_ids = entities.Select(t => t.customer_id).Distinct().ToList();
+            var customers = await _dBContext.GetDbSet<CustomerEntity>().AsNoTracking().Where(t => customer_ids.Contains(t.id)).ToListAsync();
+            foreach (var entity in entities)
+            {
+                var customer = customers.FirstOrDefault(t => t.id == entity.customer_id);
+                var dropoffAddress = customer == null ? string.Empty : $"{customer.address}, {customer.city}".Trim(' ', ',');
+                await _fleetbaseIntegrationService.CreateDeliveryOrderAsync(
+                    entity.dispatch_no,
+                    entity.customer_name,
+                    dropoffAddress,
+                    entity.weight,
+                    entity.volume,
+                    entity.carrier
+                );
             }
         }
 

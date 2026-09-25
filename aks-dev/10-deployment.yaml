@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: modernwms
+  namespace: fleetbase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: modernwms
+  template:
+    metadata:
+      labels:
+        app: modernwms
+    spec:
+      containers:
+        - name: modernwms
+          image: acovisadocker.azurecr.io/modernwms-dev:4
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: frontend
+            - containerPort: 21011
+              name: api
+          env:
+            - name: Database__db
+              value: "MySql"
+            - name: ConnectionStrings__MySqlConn
+              valueFrom:
+                secretKeyRef:
+                  name: modernwms-mysql
+                  key: MYSQL_CONNECTION_STRING
+            - name: TokenSettings__SigningKey
+              valueFrom:
+                secretKeyRef:
+                  name: modernwms-app
+                  key: SIGNING_KEY
+            - name: Fleetbase__ApiUrl
+              valueFrom:
+                secretKeyRef:
+                  name: modernwms-fleetbase-integration
+                  key: API_URL
+            - name: Fleetbase__ApiKey
+              valueFrom:
+                secretKeyRef:
+                  name: modernwms-fleetbase-integration
+                  key: API_KEY
+            - name: Fleetbase__PickupAddress
+              valueFrom:
+                secretKeyRef:
+                  name: modernwms-fleetbase-integration
+                  key: PICKUP_ADDRESS
+          resources:
+            requests:
+              cpu: "150m"
+              memory: "384Mi"
+            limits:
+              cpu: "200m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: modernwms-frontend
+  namespace: fleetbase
+spec:
+  selector:
+    app: modernwms
+  ports:
+    - port: 80
+      targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: modernwms-api
+  namespace: fleetbase
+spec:
+  selector:
+    app: modernwms
+  ports:
+    - port: 21011
+      targetPort: 21011
